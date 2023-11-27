@@ -243,8 +243,8 @@ class PipeshardParallel(ParallelMethod):
             self.as_option, self.layer_option, self.stage_option, None,
             self.stage_input_shardings, self.manual_sharding_option, *avals)
 
-from alpa.aibot_pipeline_parallel.compile_executable import compile_aibot_pipeshard_executable
-class AibotPipeshardParallel(ParallelMethod):
+from alpa.bpp_pipeline_parallel.compile_executable import compile_bpp_pipeshard_executable
+class BppPipeshardParallel(ParallelMethod):
     """
     Use pipeshard parallelism which combines pipeline parallelism and
     shard parallelism.
@@ -324,7 +324,7 @@ class AibotPipeshardParallel(ParallelMethod):
 
         assert isinstance(mesh, VirtualPhysicalMesh)
 
-        return compile_aibot_pipeshard_executable(
+        return compile_bpp_pipeshard_executable(
             fun, in_tree, out_tree_thunk, static_argnums, donated_invars,
             batch_invars, mesh, self.num_micro_batches, self.pipeline_schedule,
             self.as_option, self.layer_option, self.stage_option, None,

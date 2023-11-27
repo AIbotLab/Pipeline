@@ -713,23 +713,23 @@ def cluster_layers_and_slice_mesh(
     if not inference_mode:
         # import networkx as nx
 
-        from . import util as cygutil
+        from . import util as bpputil
 
         # 合并JaxPipelineComputation到Jaxpr
         # 拿出反向的pipeline_layers
         start = int(len(layers) / 2)
         back_layers = layers[start:]
-        temp_jaxpr = cygutil.transJaxPipelineComputationsToMergedJaxpr(back_layers)
+        temp_jaxpr = bpputil.transJaxPipelineComputationsToMergedJaxpr(back_layers)
         layers_eqn_num = []
         for layer in back_layers:
             layers_eqn_num.append(len(layer.eqns))
         # 创建DAG图
-        jaxpr_DAG = cygutil.translateJaxprToNetworkxWithoutVarAndPipelineMarker(temp_jaxpr)
+        jaxpr_DAG = bpputil.translateJaxprToNetworkxWithoutVarAndPipelineMarker(temp_jaxpr)
         # 获取关键路径和关键节点和分支节点
-        critical_path = cygutil.getCriticalPathFromNetwprkx(jaxpr_DAG)
-        critical_node = cygutil.getCriticalNodesBasedCritialPath(jaxpr_DAG, critical_path)
+        critical_path = bpputil.getCriticalPathFromNetwprkx(jaxpr_DAG)
+        critical_node = bpputil.getCriticalNodesBasedCritialPath(jaxpr_DAG, critical_path)
         # non_critical_node = cygutil.getNonCriticalNodeFromNetwprkx(jaxpr_DAG)
-        eqn_type_list = cygutil.getEqnsTypeBasedCriticalNode(temp_jaxpr, critical_node)
+        eqn_type_list = bpputil.getEqnsTypeBasedCriticalNode(temp_jaxpr, critical_node)
         
         # # 绘制带参数的DAG
         # draw_DAG = cygutil.translateJaxprToNetworkxWithVar(temp_jaxpr)
@@ -745,8 +745,8 @@ def cluster_layers_and_slice_mesh(
         right = 0
         for i, jax_pipeline_layer in enumerate(back_layers):
             right = right + layers_eqn_num[i]
-            sliced_critical_layers.append(cygutil.sliceJaxPipelineComputationBasedEqnsType(jax_pipeline_layer, eqn_type_list[left:right], gensym_func)[1])
-            sliced_parallel_layers.append(cygutil.sliceJaxPipelineComputationBasedEqnsType(jax_pipeline_layer, eqn_type_list[left:right], gensym_func)[0])
+            sliced_critical_layers.append(bpputil.sliceJaxPipelineComputationBasedEqnsType(jax_pipeline_layer, eqn_type_list[left:right], gensym_func)[1])
+            sliced_parallel_layers.append(bpputil.sliceJaxPipelineComputationBasedEqnsType(jax_pipeline_layer, eqn_type_list[left:right], gensym_func)[0])
             # # 计算均衡性
             # partition = np.array([eqn_type_list[left:right],[1-i for i in eqn_type_list[left:right]]])
             # weight = np.array([eqn_index_to_floats[left:right]]).reshape(layers_eqn_num[i],1)

@@ -10,7 +10,7 @@ from jax.core import AbstractValue, ClosedJaxpr, gensym
 from jax.interpreters import pxla
 from jax.tree_util import PyTreeDef
 
-from alpa.aibot_pipeline_parallel.stage_construction import (
+from alpa.bpp_pipeline_parallel.stage_construction import (
     StageOption, cluster_layers_and_slice_mesh)
 from alpa.device_mesh import VirtualPhysicalMesh
 from alpa.global_env import global_config
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def compile_aibot_pipeshard_executable(
+def compile_bpp_pipeshard_executable(
         fun: lu.WrappedFun, in_tree: PyTreeDef,
         out_tree_thunk: Callable[[], PyTreeDef], static_argnums: Sequence[int],
         donated_invars: Sequence[bool], batch_invars: Sequence[bool],
@@ -109,7 +109,7 @@ def compile_aibot_pipeshard_executable(
                                                       in_tree, out_tree)
     else:
         parsed_ms_option = None
-    pipeshard_config = compile_pipeshard_executable_internal(
+    pipeshard_config = compile_bpp_pipeshard_executable_internal(
         closed_jaxpr, full_batch_closed_jaxpr, micro_batch_size, donated_invars,
         batch_invars, virtual_mesh, num_microbatch, pipeline_schedule,
         default_as_option, stage_option, name_base, global_input_shardings,
@@ -127,7 +127,7 @@ def compile_aibot_pipeshard_executable(
     return executable
 
 
-def compile_pipeshard_executable_internal(
+def compile_bpp_pipeshard_executable_internal(
         closed_jaxpr: ClosedJaxpr,
         full_batch_closed_jaxpr: Optional[ClosedJaxpr], micro_batch_size: int,
         donated_invars: Sequence[bool], batch_invars: Sequence[bool],
@@ -199,9 +199,9 @@ def compile_pipeshard_executable_internal(
 
     # 崔勇敢测试 生成流水线阶段间依赖关系矩阵 代码 开始
     
-    from . import schedules as cygschedule
-    dependency = cygschedule.genDependencyWithStages(jax_pipeline_stages, sliced_apply_grad_stages)
-    schedule = cygschedule.PipeDreamFlushWithBackwardWeightDelay(dependency=dependency,
+    from . import schedules as bppschedule
+    dependency = bppschedule.genDependencyWithStages(jax_pipeline_stages, sliced_apply_grad_stages)
+    schedule = bppschedule.PipeDreamFlushWithBackwardWeightDelay(dependency=dependency,
                                  meshes=sliced_virtual_meshes,
                                  apply_grad_placement=apply_grad_placement,
                                  num_batch=num_microbatch)
